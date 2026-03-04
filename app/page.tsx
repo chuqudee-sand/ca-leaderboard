@@ -6,7 +6,8 @@ import { Scroll, Sword, Shield, Trophy, Crown, Sparkles, Map, Medal, Lock, Packa
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyJnWiKtEHN4YkNHl92J7a4d3WooYitfNM5ZK8b3a_UR0iRnaDFjIoJXgma6tFM_93W/exec";
 
-const formatCohort = (rawCohort) => {
+// Added ': any' to satisfy TypeScript
+const formatCohort = (rawCohort: any) => {
   const match = (rawCohort || "Unknown").match(/C#(\d+)/);
   return match ? `Cohort ${match[1]}` : rawCohort || "Unknown";
 };
@@ -26,22 +27,24 @@ const equipmentList = [
 export default function AdventurersTavern() {
   const [currentView, setCurrentView] = useState('home');
   const [email, setEmail] = useState('');
-  const [playerData, setPlayerData] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
+  
+  // Added TypeScript state definitions (<any>, <any[]>)
+  const [playerData, setPlayerData] = useState<any>(null);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState('');
   const [displayedXP, setDisplayedXP] = useState(0);
-  const [selectedGear, setSelectedGear] = useState(null);
+  const [selectedGear, setSelectedGear] = useState<any>(null);
   const [guildFilter, setGuildFilter] = useState('All');
   
   const [isPlaying, setIsPlaying] = useState(true);
-  const audioRef = useRef(null);
+  const audioRef = useRef<any>(null);
 
   useEffect(() => {
     fetch(API_URL).then(res => res.json()).then(data => {
       if (data.success) {
-        setLeaderboard(data.leaderboard.map(hero => {
+        setLeaderboard(data.leaderboard.map((hero: any) => {
           const rawString = String(hero.cohort || "").toUpperCase();
           let prog = "PF"; if (rawString.includes("AICE")) prog = "AiCE"; else if (rawString.includes("VA")) prog = "VA";
           return { ...hero, program: prog, cohort: formatCohort(hero.cohort), country: String(hero.country || "").trim() };
@@ -51,7 +54,7 @@ export default function AdventurersTavern() {
     }).catch(() => setLoading(false));
   }, []);
 
-  const fetchHero = async (e) => {
+  const fetchHero = async (e: any) => {
     e.preventDefault();
     if (!email) return;
     setSearchLoading(true); setError(''); setDisplayedXP(0);
@@ -67,11 +70,13 @@ export default function AdventurersTavern() {
   };
 
   const toggleMusic = () => {
-    if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); } 
-    else { audioRef.current.play(); setIsPlaying(true); }
+    if (audioRef.current) {
+      if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); } 
+      else { audioRef.current.play(); setIsPlaying(true); }
+    }
   };
 
-  const getRPGStats = (player) => {
+  const getRPGStats = (player: any) => {
     if (!player) return null;
     const programCode = String(player["Location Program Cohort"] || "");
     let maxLevel = 12; let programName = "Professional Foundations";
@@ -102,10 +107,10 @@ export default function AdventurersTavern() {
     }
   }, [currentView, stats?.currentScore]);
 
-  const GuildPage = ({ programKey, title, themeColor }) => {
-    const programData = leaderboard.filter(h => h.program === programKey);
-    const cohorts = [...new Set(programData.map(h => h.cohort))].filter(c => c !== "Unknown").sort();
-    const filteredData = programData.filter(h => guildFilter === 'All' || h.cohort === guildFilter).sort((a, b) => b.score - a.score);
+  const GuildPage = ({ programKey, title, themeColor }: any) => {
+    const programData = leaderboard.filter((h: any) => h.program === programKey);
+    const cohorts = [...new Set(programData.map((h: any) => h.cohort))].filter(c => c !== "Unknown").sort();
+    const filteredData = programData.filter((h: any) => guildFilter === 'All' || h.cohort === guildFilter).sort((a: any, b: any) => b.score - a.score);
     
     const topThree = filteredData.slice(0, 3);
     const scrollList = filteredData.slice(3, 10);
@@ -120,7 +125,7 @@ export default function AdventurersTavern() {
           <h2 className={`text-5xl font-serif font-bold ${themeColor} drop-shadow-lg`}>{title} Rankings</h2>
           <select className="mt-4 md:mt-0 bg-stone-900 border border-stone-600 text-stone-300 text-lg rounded-lg px-4 py-2 outline-none focus:border-amber-500 cursor-pointer shadow-lg" value={guildFilter} onChange={(e) => setGuildFilter(e.target.value)}>
             <option value="All">All Cohorts</option>
-            {cohorts.map(c => <option key={c} value={c}>{c}</option>)}
+            {cohorts.map(c => <option key={String(c)} value={String(c)}>{String(c)}</option>)}
           </select>
         </div>
 
@@ -179,7 +184,7 @@ export default function AdventurersTavern() {
                   <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/aged-paper.png")' }}></div>
                   <h3 className="text-2xl font-bold text-center mb-6 border-b-2 border-[#8b5a2b]/30 pb-4 tracking-widest uppercase">The Honored Elite</h3>
                   <div className="space-y-4 relative z-10">
-                    {scrollList.map((hero, idx) => (
+                    {scrollList.map((hero: any, idx: number) => (
                       <div key={idx} className="flex items-center justify-between border-b border-[#8b5a2b]/20 pb-2 hover:bg-[#d8c09d] transition-colors p-2 rounded">
                         <div className="flex items-center gap-4">
                           <span className="font-bold text-xl text-[#8b5a2b] w-6">{idx + 4}.</span>
@@ -213,7 +218,7 @@ export default function AdventurersTavern() {
       <AnimatePresence>
         {selectedGear && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedGear(null)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <motion.div initial={{ scale: 0.8, y: 50 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0 }} onClick={(e) => e.stopPropagation()} className={`relative max-w-lg w-full rounded-2xl p-8 border ${selectedGear.isUnlocked ? 'bg-gradient-to-b from-stone-800 to-stone-900 border-amber-500 shadow-[0_0_50px_rgba(217,119,6,0.3)]' : 'bg-stone-900 border-stone-700'}`}>
+            <motion.div initial={{ scale: 0.8, y: 50 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0 }} onClick={(e: any) => e.stopPropagation()} className={`relative max-w-lg w-full rounded-2xl p-8 border ${selectedGear.isUnlocked ? 'bg-gradient-to-b from-stone-800 to-stone-900 border-amber-500 shadow-[0_0_50px_rgba(217,119,6,0.3)]' : 'bg-stone-900 border-stone-700'}`}>
               <button onClick={() => setSelectedGear(null)} className="absolute top-4 right-4 text-stone-400 hover:text-white"><X className="w-6 h-6" /></button>
               <div className="flex flex-col items-center text-center">
                 <div className={`mb-6 p-5 rounded-full ${selectedGear.isUnlocked ? 'bg-amber-500/20 text-amber-400 drop-shadow-[0_0_20px_rgba(245,158,11,0.8)]' : 'bg-stone-800 text-stone-600'}`}>{selectedGear.icon}</div>
@@ -317,7 +322,7 @@ export default function AdventurersTavern() {
                     <img src={`https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${playerData["First name"]}${playerData["Last name"]}&backgroundColor=transparent`} alt="Hero Avatar" className="w-full h-full object-cover" />
                   </div>
                   <h2 className="text-2xl font-serif text-amber-500 mb-1 z-10">{playerData["First name"]} {playerData["Last name"]}</h2>
-                  <p className="text-xs text-stone-400 mb-6 z-10 uppercase tracking-widest">{stats.programName} Adventurer</p>
+                  <p className="text-xs text-stone-400 mb-6 z-10 uppercase tracking-widest">{stats?.programName} Adventurer</p>
                   <div className="w-full space-y-4 border-t border-stone-800 pt-6">
                     <div><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Global Rank</p><p className="text-4xl font-serif text-stone-200">#{playerData.Rank}</p></div>
                     <div><p className="text-xs text-stone-500 uppercase tracking-wider mb-1">Current Status</p><p className="text-xl font-serif text-amber-400">{playerData["Level"] || "Level 0"}</p></div>
@@ -331,10 +336,10 @@ export default function AdventurersTavern() {
                         <p className="text-sm text-stone-500 uppercase tracking-wider mb-1">Total Experience</p>
                         <p className="text-5xl font-mono text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.3)]">{displayedXP} <span className="text-lg text-amber-400/50">XP</span></p>
                       </div>
-                      <div className="text-right"><p className="text-sm text-stone-400 bg-stone-800 px-3 py-1 rounded-full border border-stone-700">Max Cap: Level {stats.maxLevel}</p></div>
+                      <div className="text-right"><p className="text-sm text-stone-400 bg-stone-800 px-3 py-1 rounded-full border border-stone-700">Max Cap: Level {stats?.maxLevel}</p></div>
                     </div>
                     <div className="h-6 bg-stone-950 rounded-full overflow-hidden border border-stone-800 relative shadow-inner">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${stats.xpPercentage}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-700 via-amber-500 to-yellow-300 relative">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.xpPercentage}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-700 via-amber-500 to-yellow-300 relative">
                         <div className="absolute right-0 top-0 h-full w-4 bg-white opacity-80 blur-[4px] shadow-[0_0_15px_5px_rgba(255,255,255,0.8)]"></div>
                       </motion.div>
                     </div>
@@ -345,12 +350,12 @@ export default function AdventurersTavern() {
                       <h3 className="font-serif text-xl text-stone-300 border-b border-stone-800 pb-3 mb-4 flex items-center gap-2"><Sword className="w-5 h-5 text-amber-600"/> Quest Log</h3>
                       <ul className="space-y-3 text-sm">
                         <li className="flex items-start gap-3">
-                          {stats.currentTests >= stats.dueTests ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-yellow-600 shrink-0"/>}
-                          <div><span className={stats.currentTests >= stats.dueTests ? "text-stone-300" : "text-stone-500"}>Daily Quests (Tests/Quiz)</span><span className="block text-xs text-stone-600 mt-0.5">{stats.currentTests} / {stats.dueTests} Completed • <span className="text-amber-500/70">+10 XP each</span></span></div>
+                          {stats && stats.currentTests >= stats.dueTests ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-yellow-600 shrink-0"/>}
+                          <div><span className={stats && stats.currentTests >= stats.dueTests ? "text-stone-300" : "text-stone-500"}>Daily Quests (Tests/Quiz)</span><span className="block text-xs text-stone-600 mt-0.5">{stats?.currentTests} / {stats?.dueTests} Completed • <span className="text-amber-500/70">+10 XP each</span></span></div>
                         </li>
                         <li className="flex items-start gap-3 pt-2">
-                          {stats.currentMilestones >= stats.dueMilestones ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-yellow-600 shrink-0"/>}
-                          <div><span className={stats.currentMilestones >= stats.dueMilestones ? "text-stone-300" : "text-stone-500"}>Boss Fights (Milestones)</span><span className="block text-xs text-stone-600 mt-0.5">{stats.currentMilestones} / {stats.dueMilestones} Defeated • <span className="text-amber-500/70">+25 XP each</span></span></div>
+                          {stats && stats.currentMilestones >= stats.dueMilestones ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-yellow-600 shrink-0"/>}
+                          <div><span className={stats && stats.currentMilestones >= stats.dueMilestones ? "text-stone-300" : "text-stone-500"}>Boss Fights (Milestones)</span><span className="block text-xs text-stone-600 mt-0.5">{stats?.currentMilestones} / {stats?.dueMilestones} Defeated • <span className="text-amber-500/70">+25 XP each</span></span></div>
                         </li>
                       </ul>
                     </div>
@@ -359,16 +364,16 @@ export default function AdventurersTavern() {
                       <h3 className="font-serif text-xl text-stone-300 border-b border-stone-800 pb-3 mb-4 flex items-center gap-2"><Map className="w-5 h-5 text-blue-500"/> Guild Alliances</h3>
                       <ul className="space-y-3 text-sm">
                         <li className="flex items-start gap-3">
-                          {stats.pfBonus >= 20 ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-stone-700 shrink-0"/>}
-                          <div><span className={stats.pfBonus >= 20 ? "text-stone-300" : "text-stone-600"}>Registered in PeerFinder</span><span className="block text-xs text-stone-600 mt-0.5">Joined the Guild • <span className="text-amber-500/70">+20 XP</span></span></div>
+                          {stats && stats.pfBonus >= 20 ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-stone-700 shrink-0"/>}
+                          <div><span className={stats && stats.pfBonus >= 20 ? "text-stone-300" : "text-stone-600"}>Registered in PeerFinder</span><span className="block text-xs text-stone-600 mt-0.5">Joined the Guild • <span className="text-amber-500/70">+20 XP</span></span></div>
                         </li>
                         <li className="flex items-start gap-3 pt-2">
-                          {stats.pfBonus >= 30 ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-stone-700 shrink-0"/>}
-                          <div><span className={stats.pfBonus >= 30 ? "text-stone-300" : "text-stone-600"}>Formed a Party</span><span className="block text-xs text-stone-600 mt-0.5">Matched with peers • <span className="text-amber-500/70">+10 XP</span></span></div>
+                          {stats && stats.pfBonus >= 30 ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-stone-700 shrink-0"/>}
+                          <div><span className={stats && stats.pfBonus >= 30 ? "text-stone-300" : "text-stone-600"}>Formed a Party</span><span className="block text-xs text-stone-600 mt-0.5">Matched with peers • <span className="text-amber-500/70">+10 XP</span></span></div>
                         </li>
                         <li className="flex items-start gap-3 pt-2">
-                          {stats.pfBonus >= 50 ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-stone-700 shrink-0"/>}
-                          <div><span className={stats.pfBonus >= 50 ? "text-stone-300" : "text-stone-600"}>Guild Mentor</span><span className="block text-xs text-stone-600 mt-0.5">Volunteered to offer support • <span className="text-amber-500/70">+20 Extra XP</span></span></div>
+                          {stats && stats.pfBonus >= 50 ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0"/> : <MinusCircle className="w-5 h-5 text-stone-700 shrink-0"/>}
+                          <div><span className={stats && stats.pfBonus >= 50 ? "text-stone-300" : "text-stone-600"}>Guild Mentor</span><span className="block text-xs text-stone-600 mt-0.5">Volunteered to offer support • <span className="text-amber-500/70">+20 Extra XP</span></span></div>
                         </li>
                       </ul>
                     </div>
@@ -382,7 +387,7 @@ export default function AdventurersTavern() {
                 <p className="text-center text-stone-300 mb-10 italic max-w-2xl mx-auto leading-relaxed">"{playerData["First name"]}, the ALX community has something big waiting for you in this journey. This is more than legacy points. And trust me when I say it is <span className="text-amber-400 font-bold uppercase tracking-wider">Big</span>. All you have to do is unlock all items to get it!"</p>
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                  {equipmentList.filter(item => item.level <= stats.maxLevel).map((item, idx) => {
+                  {stats && equipmentList.filter(item => item.level <= stats.maxLevel).map((item, idx) => {
                     const isUnlocked = stats.currentMilestones >= item.level;
                     return (
                       <motion.div key={idx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} onClick={() => setSelectedGear({ ...item, isUnlocked })} className={`relative p-6 rounded-xl flex flex-col items-center text-center cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] ${isUnlocked ? 'bg-gradient-to-b from-stone-800 to-stone-900 border border-amber-600/50 shadow-[0_15px_30px_-5px_rgba(217,119,6,0.3),inset_0_2px_10px_rgba(255,255,255,0.1)]' : 'bg-stone-950 border border-stone-800 opacity-70 shadow-[inset_0_10px_20px_rgba(0,0,0,0.5)]'}`}>
