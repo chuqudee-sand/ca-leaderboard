@@ -28,7 +28,6 @@ export default function AdventurersTavern() {
   const [currentView, setCurrentView] = useState('home');
   const [email, setEmail] = useState('');
   
-  // Added TypeScript state definitions (<any>, <any[]>)
   const [playerData, setPlayerData] = useState<any>(null);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,12 +133,20 @@ export default function AdventurersTavern() {
         ) : (
           <>
             <div className="flex justify-center items-end gap-2 md:gap-6 h-80 mb-16 px-4">
+              {/* 2nd Place */}
               {topThree[1] && (
                 <motion.div initial={{ height: 0 }} animate={{ height: '100%' }} className="flex flex-col items-center justify-end w-32 md:w-48">
                   <div className="flex flex-col items-center mb-4 z-10">
                     <Medal className="w-10 h-10 text-slate-300 drop-shadow-[0_0_10px_rgba(203,213,225,0.8)] mb-2" />
                     <img src={`https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${topThree[1].name}&backgroundColor=transparent`} className="w-16 h-16 rounded-full bg-stone-800 border-2 border-slate-400" alt="2nd" />
                     <p className="text-center font-bold text-stone-200 mt-2 truncate w-full">{topThree[1].name}</p>
+                    
+                    {/* NEW: 2nd Place Country Badge */}
+                    <div className="flex items-center gap-1.5 my-1 bg-stone-900/50 px-2 py-0.5 rounded-full border border-slate-500/30">
+                      <img src={topThree[1].flag} alt={topThree[1].country} title={topThree[1].country} className="w-3.5 h-auto rounded-sm shadow-sm" />
+                      <span className="text-[9px] text-slate-300 uppercase tracking-wider truncate max-w-[60px]">{topThree[1].country === "Rest of Africa" ? "ROA" : topThree[1].country}</span>
+                    </div>
+
                     <p className="text-amber-400 font-mono text-sm">{topThree[1].score} XP</p>
                   </div>
                   <div className="w-full h-40 bg-gradient-to-t from-stone-900 to-slate-700 rounded-t-lg border-t-4 border-slate-400 shadow-[0_0_30px_rgba(148,163,184,0.2)] flex justify-center pt-4">
@@ -148,12 +155,20 @@ export default function AdventurersTavern() {
                 </motion.div>
               )}
 
+              {/* 1st Place */}
               {topThree[0] && (
                 <motion.div initial={{ height: 0 }} animate={{ height: '100%' }} className="flex flex-col items-center justify-end w-36 md:w-56 z-20">
                   <div className="flex flex-col items-center mb-4">
                     <Crown className="w-14 h-14 text-yellow-400 drop-shadow-[0_0_20px_rgba(250,204,21,1)] mb-2" />
                     <img src={`https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${topThree[0].name}&backgroundColor=transparent`} className="w-20 h-20 rounded-full bg-stone-800 border-4 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)]" alt="1st" />
                     <p className="text-center font-bold text-yellow-400 text-lg mt-2 truncate w-full">{topThree[0].name}</p>
+                    
+                    {/* NEW: 1st Place Country Badge */}
+                    <div className="flex items-center gap-1.5 my-1 bg-stone-900/50 px-2.5 py-0.5 rounded-full border border-yellow-500/40">
+                      <img src={topThree[0].flag} alt={topThree[0].country} title={topThree[0].country} className="w-4 h-auto rounded-sm shadow-sm" />
+                      <span className="text-[10px] text-yellow-200/90 uppercase tracking-wider truncate max-w-[70px]">{topThree[0].country === "Rest of Africa" ? "ROA" : topThree[0].country}</span>
+                    </div>
+
                     <p className="text-amber-200 font-mono font-bold">{topThree[0].score} XP</p>
                   </div>
                   <div className="w-full h-56 bg-gradient-to-t from-amber-900 to-yellow-600 rounded-t-lg border-t-4 border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.3)] flex justify-center pt-4">
@@ -162,12 +177,20 @@ export default function AdventurersTavern() {
                 </motion.div>
               )}
 
+              {/* 3rd Place */}
               {topThree[2] && (
                 <motion.div initial={{ height: 0 }} animate={{ height: '100%' }} className="flex flex-col items-center justify-end w-32 md:w-48">
                   <div className="flex flex-col items-center mb-4 z-10">
                     <Medal className="w-10 h-10 text-amber-700 drop-shadow-[0_0_10px_rgba(180,83,9,0.8)] mb-2" />
                     <img src={`https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${topThree[2].name}&backgroundColor=transparent`} className="w-16 h-16 rounded-full bg-stone-800 border-2 border-amber-800" alt="3rd" />
                     <p className="text-center font-bold text-stone-300 mt-2 truncate w-full">{topThree[2].name}</p>
+                    
+                    {/* NEW: 3rd Place Country Badge */}
+                    <div className="flex items-center gap-1.5 my-1 bg-stone-900/50 px-2 py-0.5 rounded-full border border-amber-700/40">
+                      <img src={topThree[2].flag} alt={topThree[2].country} title={topThree[2].country} className="w-3.5 h-auto rounded-sm shadow-sm" />
+                      <span className="text-[9px] text-amber-500/80 uppercase tracking-wider truncate max-w-[60px]">{topThree[2].country === "Rest of Africa" ? "ROA" : topThree[2].country}</span>
+                    </div>
+
                     <p className="text-amber-500 font-mono text-sm">{topThree[2].score} XP</p>
                   </div>
                   <div className="w-full h-32 bg-gradient-to-t from-stone-900 to-amber-900 rounded-t-lg border-t-4 border-amber-700 shadow-[0_0_30px_rgba(180,83,9,0.2)] flex justify-center pt-4">
@@ -188,7 +211,7 @@ export default function AdventurersTavern() {
                       <div key={idx} className="flex items-center justify-between border-b border-[#8b5a2b]/20 pb-2 hover:bg-[#d8c09d] transition-colors p-2 rounded">
                         <div className="flex items-center gap-4">
                           <span className="font-bold text-xl text-[#8b5a2b] w-6">{idx + 4}.</span>
-                          <img src={hero.flag} className="w-6 shadow-sm" alt="flag" />
+                          <img src={hero.flag} className="w-6 shadow-sm" alt="flag" title={hero.country} />
                           <span className="font-bold text-lg">{hero.name}</span>
                         </div>
                         <span className="font-mono font-bold text-[#5d4037]">{hero.score} XP</span>
@@ -282,7 +305,7 @@ export default function AdventurersTavern() {
                 <h3 className="text-3xl font-serif text-center mb-12 flex items-center justify-center gap-3 text-stone-300 tracking-wider">
                   <Trophy className="w-8 h-8 text-amber-500" /> Explore the Guild Rankings
                 </h3>
-                {loading ? <div className="text-center text-amber-600/70 animate-pulse font-serif text-2xl">Consulting the archives...</div> : (
+                {loading ? <div className="text-center text-amber-600/70 animate-pulse font-serif text-2xl">Consulting the archives, please wait...</div> : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
                     <button onClick={() => { setGuildFilter('All'); setCurrentView('aice'); }} className="relative group p-8 rounded-2xl bg-gradient-to-b from-blue-900 to-blue-950 border border-blue-500/30 transition-all duration-300 hover:-translate-y-4 shadow-[0_10px_30px_rgba(37,99,235,0.2)] hover:shadow-[0_20px_50px_rgba(37,99,235,0.5)] flex flex-col items-center">
                       <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(59,130,246,0.5)]"><Sword className="w-10 h-10 text-blue-400" /></div>
