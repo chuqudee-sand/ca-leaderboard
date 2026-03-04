@@ -76,11 +76,12 @@ export default function AdventurersTavern() {
 
   const getRPGStats = (player: any) => {
     if (!player) return null;
-    const programCode = String(player["Location Program Cohort"] || "");
-    let maxLevel = 12; let programName = "Professional Foundations";
-    if (programCode.includes("AiCE")) { maxLevel = 6; programName = "AiCE"; }
-    else if (programCode.includes("VA")) { maxLevel = 8; programName = "Virtual Assistant"; }
+    const programCode = String(player["Location Program Cohort"] || "").toUpperCase();
+    let maxLevel = 12; let programName = "Professional Foundations"; let programKey = "PF";
+    if (programCode.includes("AICE")) { maxLevel = 6; programName = "AiCE"; programKey = "AiCE"; }
+    else if (programCode.includes("VA")) { maxLevel = 8; programName = "Virtual Assistant"; programKey = "VA"; }
 
+    const playerCohort = formatCohort(player["Original Cohort Name"] || "");
     const currentMilestones = parseInt(player["Total_Milestones_Submitted"]) || 0;
     const dueMilestones = parseInt(player["Total_due_Milestones"]) || 0;
     const currentTests = parseInt(player["Total_Tests_Submitted"]) || 0;
@@ -91,10 +92,14 @@ export default function AdventurersTavern() {
     const pfBonus = parseInt(player["PeerFinder Bonus"]) || 0;
     const xpPercentage = Math.min(100, Math.max(0, (currentScore / maxScore) * 100));
 
-    return { maxLevel, programName, currentMilestones, dueMilestones, currentTests, dueTests, currentScore, maxScore, xpPercentage, pfBonus };
+    return { maxLevel, programName, programKey, playerCohort, currentMilestones, dueMilestones, currentTests, dueTests, currentScore, maxScore, xpPercentage, pfBonus };
   };
 
   const stats = getRPGStats(playerData);
+
+  // Dynamic ranking calculations based on the live leaderboard array!
+  const programRank = stats ? leaderboard.filter(h => h.program === stats.programKey && h.score > stats.currentScore).length + 1 : 0;
+  const cohortRank = stats ? leaderboard.filter(h => h.program === stats.programKey && h.cohort === stats.playerCohort && h.score > stats.currentScore).length + 1 : 0;
 
   useEffect(() => {
     if (currentView === 'dashboard' && stats) {
@@ -121,10 +126,14 @@ export default function AdventurersTavern() {
 
         <div className="flex flex-col md:flex-row justify-between items-center mb-12">
           <h2 className={`text-5xl font-serif font-bold ${themeColor} drop-shadow-[0_0_15px_currentColor]`}>{title} Rankings</h2>
-          <select className={`mt-4 md:mt-0 bg-[#002B56] border ${themeBorder} text-white text-lg rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-[#05F283] cursor-pointer shadow-lg`} value={guildFilter} onChange={(e) => setGuildFilter(e.target.value)}>
-            <option value="All">All Cohorts</option>
-            {cohorts.map(c => <option key={String(c)} value={String(c)}>{String(c)}</option>)}
-          </select>
+          
+          <div className="mt-6 md:mt-0 flex flex-col items-end">
+            <label className="text-[10px] text-[#27DEF2] font-bold uppercase tracking-widest mb-1">View By Cohort</label>
+            <select className={`bg-[#002B56] border ${themeBorder} text-white text-lg rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-[#05F283] cursor-pointer shadow-lg w-full md:w-auto`} value={guildFilter} onChange={(e) => setGuildFilter(e.target.value)}>
+              <option value="All">All Cohorts</option>
+              {cohorts.map(c => <option key={String(c)} value={String(c)}>{String(c)}</option>)}
+            </select>
+          </div>
         </div>
 
         {filteredData.length === 0 ? (
@@ -170,7 +179,7 @@ export default function AdventurersTavern() {
                 </motion.div>
               )}
 
-              {/* 3rd Place (Using ALX Tomato red/bronze tone) */}
+              {/* 3rd Place */}
               {topThree[2] && (
                 <motion.div initial={{ height: 0 }} animate={{ height: '100%' }} className="flex flex-col items-center justify-end w-32 md:w-48">
                   <div className="flex flex-col items-center mb-4 z-10">
@@ -219,10 +228,14 @@ export default function AdventurersTavern() {
 
   return (
     <div className="min-h-screen bg-[#00152b] text-white font-sans selection:bg-[#05F283] selection:text-[#002B56] pb-16 relative overflow-x-hidden">
-      {/* ALX Brand Background Magic */}
-      <div className="fixed inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, #028ECA 0%, transparent 60%)' }} />
-      <audio ref={audioRef} src="/theme.mp3" loop autoPlay />
       
+      {/* MASSIVE ALX BACKGROUND WATERMARK */}
+      <img src="/alx_white.png" alt="ALX Background" className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] opacity-[0.03] pointer-events-none z-0 object-contain" />
+      
+      {/* Gradient Overlay */}
+      <div className="fixed inset-0 opacity-20 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle at center, #028ECA 0%, transparent 60%)' }} />
+      
+      <audio ref={audioRef} src="/theme.mp3" loop autoPlay />
       <button onClick={toggleMusic} className="fixed bottom-6 right-6 z-50 bg-[#002B56] border border-[#05F283]/50 p-4 rounded-full shadow-[0_0_20px_rgba(5,242,131,0.3)] text-[#05F283] hover:text-white hover:scale-110 transition-all">
         {isPlaying ? <Music className="w-6 h-6 animate-pulse" /> : <VolumeX className="w-6 h-6" />}
       </button>
@@ -263,10 +276,12 @@ export default function AdventurersTavern() {
         )}
       </AnimatePresence>
 
-      <main className="relative max-w-[90rem] mx-auto p-6 pt-12">
+      <main className="relative z-10 max-w-[90rem] mx-auto p-6 pt-12">
         {currentView === 'home' && (
           <header className="text-center mb-16">
             <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+              {/* BRAND LOGO ADDED TO HEADER */}
+              <img src="/alx_white.png" alt="ALX Logo" className="h-10 mx-auto mb-6 opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
               <Crown className="w-20 h-20 mx-auto text-[#FBD437] mb-6 drop-shadow-[0_0_25px_rgba(251,212,55,0.8)]" />
               <h1 className="text-6xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#05F283] via-[#27DEF2] to-[#05F283] uppercase tracking-widest drop-shadow-lg">The ALX Cyber-Sanctum</h1>
               <p className="mt-5 text-[#27DEF2] tracking-widest uppercase text-base">Your epic learning quest awaits</p>
@@ -284,7 +299,7 @@ export default function AdventurersTavern() {
                   <form onSubmit={fetchHero} className="space-y-5">
                     <input type="email" required placeholder="Enter your email address..." className="w-full bg-[#00152b] border border-[#028ECA] rounded-lg p-4 text-lg text-white placeholder-[#27DEF2]/50 focus:outline-none focus:border-[#05F283] focus:ring-1 focus:ring-[#05F283] transition-colors shadow-inner" value={email} onChange={(e) => setEmail(e.target.value)} />
                     <button type="submit" disabled={searchLoading} className="w-full bg-gradient-to-r from-[#05F283] to-[#41C9B9] hover:from-[#41C9B9] hover:to-[#028ECA] text-[#002B56] font-bold uppercase tracking-widest text-lg py-4 rounded-lg transition-all shadow-[0_0_15px_rgba(5,242,131,0.4)] flex justify-center items-center">
-                      {searchLoading ? <Sparkles className="w-6 h-6 animate-spin" /> : "Access Dashboard"}
+                      {searchLoading ? <Sparkles className="w-6 h-6 animate-spin" /> : "Initialize Mainframe"}
                     </button>
                     {error && <p className="text-[#FF5347] text-sm text-center animate-pulse mt-2">{error}</p>}
                   </form>
@@ -297,19 +312,16 @@ export default function AdventurersTavern() {
                 </h3>
                 {loading ? <div className="text-center text-[#27DEF2] animate-pulse font-serif text-2xl">Syncing with ALX Mainframe, please wait...</div> : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
-                    {/* AiCE - Electric Blue */}
                     <button onClick={() => { setGuildFilter('All'); setCurrentView('aice'); }} className="relative group p-8 rounded-2xl bg-gradient-to-b from-[#002B56] to-[#028ECA]/40 border border-[#27DEF2]/50 transition-all duration-300 hover:-translate-y-4 shadow-[0_10px_30px_rgba(39,222,242,0.2)] hover:shadow-[0_20px_50px_rgba(39,222,242,0.5)] flex flex-col items-center">
                       <div className="w-20 h-20 bg-[#27DEF2]/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(39,222,242,0.5)]"><Sword className="w-10 h-10 text-[#27DEF2]" /></div>
                       <h3 className="text-2xl font-serif font-bold text-white uppercase tracking-widest mb-2">AiCE</h3>
                       <p className="text-[#27DEF2] text-sm">Enter the Hall of Engineers</p>
                     </button>
-                    {/* VA - Iris */}
                     <button onClick={() => { setGuildFilter('All'); setCurrentView('va'); }} className="relative group p-8 rounded-2xl bg-gradient-to-b from-[#002B56] to-[#5648B7]/40 border border-[#5648B7]/50 transition-all duration-300 hover:-translate-y-4 shadow-[0_10px_30px_rgba(86,72,183,0.2)] hover:shadow-[0_20px_50px_rgba(86,72,183,0.5)] flex flex-col items-center">
                       <div className="w-20 h-20 bg-[#5648B7]/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(86,72,183,0.5)]"><Package className="w-10 h-10 text-[#5648B7]" /></div>
                       <h3 className="text-2xl font-serif font-bold text-white uppercase tracking-widest text-center mb-2">Virtual Assistant</h3>
                       <p className="text-[#5648B7] text-sm">Enter the Hall of Logistics</p>
                     </button>
-                    {/* PF - Turquoise / Spring Green */}
                     <button onClick={() => { setGuildFilter('All'); setCurrentView('pf'); }} className="relative group p-8 rounded-2xl bg-gradient-to-b from-[#002B56] to-[#41C9B9]/40 border border-[#05F283]/50 transition-all duration-300 hover:-translate-y-4 shadow-[0_10px_30px_rgba(5,242,131,0.2)] hover:shadow-[0_20px_50px_rgba(5,242,131,0.5)] flex flex-col items-center">
                       <div className="w-20 h-20 bg-[#05F283]/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(5,242,131,0.5)]"><Shield className="w-10 h-10 text-[#05F283]" /></div>
                       <h3 className="text-2xl font-serif font-bold text-white uppercase tracking-widest text-center mb-2">Professional Foundations</h3>
@@ -332,17 +344,33 @@ export default function AdventurersTavern() {
               </button>
               
               <div className="grid md:grid-cols-4 gap-8">
-                {/* ID Card */}
+                {/* ID Card with the NEW Ranking Grid */}
                 <div className="md:col-span-1 bg-[#002B56] border border-[#028ECA]/50 rounded-2xl p-6 relative overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.6)] flex flex-col items-center text-center">
                   <div className="absolute top-0 right-0 w-full h-32 bg-gradient-to-b from-[#028ECA]/20 to-transparent"></div>
                   <div className="w-32 h-32 rounded-full bg-[#00152b] border-4 border-[#05F283] shadow-[0_0_20px_rgba(5,242,131,0.3)] mb-4 relative z-10 overflow-hidden">
                     <img src={`https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${playerData["First name"]}${playerData["Last name"]}&backgroundColor=transparent`} alt="Hero Avatar" className="w-full h-full object-cover" />
                   </div>
                   <h2 className="text-2xl font-serif text-white mb-1 z-10">{playerData["First name"]} {playerData["Last name"]}</h2>
-                  <p className="text-xs text-[#27DEF2] mb-6 z-10 uppercase tracking-widest">{stats?.programName} Operative</p>
-                  <div className="w-full space-y-4 border-t border-[#028ECA]/30 pt-6">
-                    <div><p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Global Rank</p><p className="text-4xl font-serif text-[#FBD437]">#{playerData.Rank}</p></div>
-                    <div><p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Current Status</p><p className="text-xl font-serif text-[#05F283]">{playerData["Level"] || "Level 0"}</p></div>
+                  <p className="text-xs text-[#27DEF2] z-10 uppercase tracking-widest">{stats?.programName} Operative</p>
+                  
+                  {/* NEW 2x2 RANKING GRID */}
+                  <div className="w-full grid grid-cols-2 gap-4 border-t border-[#028ECA]/30 pt-6 mt-6">
+                    <div>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Global</p>
+                      <p className="text-xl font-serif text-[#FBD437]">#{playerData.Rank}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">{stats?.programKey}</p>
+                      <p className="text-xl font-serif text-[#27DEF2]">#{programRank}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Cohort</p>
+                      <p className="text-xl font-serif text-[#41C9B9]">#{cohortRank}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Status</p>
+                      <p className="text-[14px] font-serif text-[#05F283] font-bold uppercase mt-1">{playerData["Level"] || "Lvl 0"}</p>
+                    </div>
                   </div>
                 </div>
 
