@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, animate } from 'framer-motion';
-import { Scroll, Sword, Shield, Trophy, Crown, Sparkles, Map, Medal, Lock, Package, Coffee, Monitor, Book, PenTool, Headphones, Globe, Archive, Award, CheckCircle2, MinusCircle, X, Music, VolumeX, ChevronLeft } from 'lucide-react';
+import { Scroll, Sword, Shield, Trophy, Crown, Sparkles, Map, Medal, Lock, Package, Coffee, Monitor, Book, PenTool, Headphones, Globe, Archive, Award, CheckCircle2, MinusCircle, X, Music, VolumeX, ChevronLeft, Building, Flag } from 'lucide-react';
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyJnWiKtEHN4YkNHl92J7a4d3WooYitfNM5ZK8b3a_UR0iRnaDFjIoJXgma6tFM_93W/exec";
 
@@ -36,8 +36,10 @@ export default function AdventurersTavern() {
   const [selectedGear, setSelectedGear] = useState<any>(null);
   const [guildFilter, setGuildFilter] = useState('All');
   
-  const [isPlaying, setIsPlaying] = useState(true);
+  // Audio state - OFF by default now!
+  const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<any>(null);
+  const sfxRef = useRef<any>(null); // New SFX Reference
 
   useEffect(() => {
     fetch(API_URL).then(res => res.json()).then(data => {
@@ -97,7 +99,6 @@ export default function AdventurersTavern() {
 
   const stats = getRPGStats(playerData);
 
-  // Dynamic ranking calculations based on the live leaderboard array!
   const programRank = stats ? leaderboard.filter(h => h.program === stats.programKey && h.score > stats.currentScore).length + 1 : 0;
   const cohortRank = stats ? leaderboard.filter(h => h.program === stats.programKey && h.cohort === stats.playerCohort && h.score > stats.currentScore).length + 1 : 0;
 
@@ -141,7 +142,6 @@ export default function AdventurersTavern() {
         ) : (
           <>
             <div className="flex justify-center items-end gap-2 md:gap-6 h-80 mb-16 px-4">
-              {/* 2nd Place */}
               {topThree[1] && (
                 <motion.div initial={{ height: 0 }} animate={{ height: '100%' }} className="flex flex-col items-center justify-end w-32 md:w-48">
                   <div className="flex flex-col items-center mb-4 z-10">
@@ -160,7 +160,6 @@ export default function AdventurersTavern() {
                 </motion.div>
               )}
 
-              {/* 1st Place (Gold) */}
               {topThree[0] && (
                 <motion.div initial={{ height: 0 }} animate={{ height: '100%' }} className="flex flex-col items-center justify-end w-36 md:w-56 z-20">
                   <div className="flex flex-col items-center mb-4">
@@ -179,7 +178,6 @@ export default function AdventurersTavern() {
                 </motion.div>
               )}
 
-              {/* 3rd Place */}
               {topThree[2] && (
                 <motion.div initial={{ height: 0 }} animate={{ height: '100%' }} className="flex flex-col items-center justify-end w-32 md:w-48">
                   <div className="flex flex-col items-center mb-4 z-10">
@@ -199,7 +197,6 @@ export default function AdventurersTavern() {
               )}
             </div>
 
-            {/* High-Tech ALX Scroll */}
             {scrollList.length > 0 && (
               <div className="max-w-2xl mx-auto relative">
                 <div className="bg-[#002B56] text-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 pt-10 pb-10 min-h-[300px] relative overflow-hidden font-sans border-t-4 border-[#05F283]">
@@ -229,18 +226,25 @@ export default function AdventurersTavern() {
   return (
     <div className="min-h-screen bg-[#00152b] text-white font-sans selection:bg-[#05F283] selection:text-[#002B56] pb-16 relative overflow-x-hidden">
       
-      {/* MASSIVE ALX BACKGROUND WATERMARK */}
       <img src="/alx_white.png" alt="ALX Background" className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] opacity-[0.03] pointer-events-none z-0 object-contain" />
-      
-      {/* Gradient Overlay */}
       <div className="fixed inset-0 opacity-20 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle at center, #028ECA 0%, transparent 60%)' }} />
       
-      <audio ref={audioRef} src="/theme.mp3" loop autoPlay />
-      <button onClick={toggleMusic} className="fixed bottom-6 right-6 z-50 bg-[#002B56] border border-[#05F283]/50 p-4 rounded-full shadow-[0_0_20px_rgba(5,242,131,0.3)] text-[#05F283] hover:text-white hover:scale-110 transition-all">
-        {isPlaying ? <Music className="w-6 h-6 animate-pulse" /> : <VolumeX className="w-6 h-6" />}
-      </button>
+      {/* Audio Tags - No AutoPlay on theme.mp3 */}
+      <audio ref={audioRef} src="/theme.mp3" loop />
+      <audio ref={sfxRef} src="/unlock.mp3" />
 
-      {/* MODAL */}
+      {/* Music Toggle UI */}
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+        {!isPlaying && (
+           <motion.span initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="text-xs bg-[#002B56] border border-[#028ECA] text-[#27DEF2] px-3 py-2 rounded-full shadow-lg">
+             Turn on sound 🎶
+           </motion.span>
+        )}
+        <button onClick={toggleMusic} className="bg-[#002B56] border border-[#05F283]/50 p-4 rounded-full shadow-[0_0_20px_rgba(5,242,131,0.3)] text-[#05F283] hover:text-white hover:scale-110 transition-all">
+          {isPlaying ? <Music className="w-6 h-6 animate-pulse" /> : <VolumeX className="w-6 h-6" />}
+        </button>
+      </div>
+
       <AnimatePresence>
         {selectedGear && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedGear(null)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
@@ -280,7 +284,6 @@ export default function AdventurersTavern() {
         {currentView === 'home' && (
           <header className="text-center mb-16">
             <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-              {/* BRAND LOGO ADDED TO HEADER */}
               <img src="/alx_white.png" alt="ALX Logo" className="h-10 mx-auto mb-6 opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
               <Crown className="w-20 h-20 mx-auto text-[#FBD437] mb-6 drop-shadow-[0_0_25px_rgba(251,212,55,0.8)]" />
               <h1 className="text-6xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#05F283] via-[#27DEF2] to-[#05F283] uppercase tracking-widest drop-shadow-lg">The ALX Cyber-Sanctum</h1>
@@ -310,7 +313,7 @@ export default function AdventurersTavern() {
                 <h3 className="text-3xl font-serif text-center mb-12 flex items-center justify-center gap-3 text-white tracking-wider">
                   <Trophy className="w-8 h-8 text-[#FBD437]" /> Explore the Guild Rankings
                 </h3>
-                {loading ? <div className="text-center text-[#27DEF2] animate-pulse font-serif text-2xl">Syncing with ALX Mainframe, please wait...</div> : (
+                {loading ? <div className="text-center text-[#27DEF2] animate-pulse font-serif text-2xl">Syncing with ALX Mainframe...</div> : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
                     <button onClick={() => { setGuildFilter('All'); setCurrentView('aice'); }} className="relative group p-8 rounded-2xl bg-gradient-to-b from-[#002B56] to-[#028ECA]/40 border border-[#27DEF2]/50 transition-all duration-300 hover:-translate-y-4 shadow-[0_10px_30px_rgba(39,222,242,0.2)] hover:shadow-[0_20px_50px_rgba(39,222,242,0.5)] flex flex-col items-center">
                       <div className="w-20 h-20 bg-[#27DEF2]/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(39,222,242,0.5)]"><Sword className="w-10 h-10 text-[#27DEF2]" /></div>
@@ -344,7 +347,7 @@ export default function AdventurersTavern() {
               </button>
               
               <div className="grid md:grid-cols-4 gap-8">
-                {/* ID Card with the NEW Ranking Grid */}
+                {/* ID Card with Updated Ranking Grid */}
                 <div className="md:col-span-1 bg-[#002B56] border border-[#028ECA]/50 rounded-2xl p-6 relative overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.6)] flex flex-col items-center text-center">
                   <div className="absolute top-0 right-0 w-full h-32 bg-gradient-to-b from-[#028ECA]/20 to-transparent"></div>
                   <div className="w-32 h-32 rounded-full bg-[#00152b] border-4 border-[#05F283] shadow-[0_0_20px_rgba(5,242,131,0.3)] mb-4 relative z-10 overflow-hidden">
@@ -353,18 +356,17 @@ export default function AdventurersTavern() {
                   <h2 className="text-2xl font-serif text-white mb-1 z-10">{playerData["First name"]} {playerData["Last name"]}</h2>
                   <p className="text-xs text-[#27DEF2] z-10 uppercase tracking-widest">{stats?.programName} Operative</p>
                   
-                  {/* NEW 2x2 RANKING GRID */}
                   <div className="w-full grid grid-cols-2 gap-4 border-t border-[#028ECA]/30 pt-6 mt-6">
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Global</p>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Global Ranking</p>
                       <p className="text-xl font-serif text-[#FBD437]">#{playerData.Rank}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">{stats?.programKey}</p>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">{stats?.programKey} Ranking</p>
                       <p className="text-xl font-serif text-[#27DEF2]">#{programRank}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Cohort</p>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Cohort Ranking</p>
                       <p className="text-xl font-serif text-[#41C9B9]">#{cohortRank}</p>
                     </div>
                     <div>
@@ -398,7 +400,7 @@ export default function AdventurersTavern() {
                       <ul className="space-y-3 text-sm">
                         <li className="flex items-start gap-3">
                           {stats && stats.currentTests >= stats.dueTests ? <CheckCircle2 className="w-5 h-5 text-[#05F283] shrink-0"/> : <MinusCircle className="w-5 h-5 text-[#FF5347] shrink-0"/>}
-                          <div><span className={stats && stats.currentTests >= stats.dueTests ? "text-white" : "text-slate-400"}>Daily Quests (Tests/Quiz)</span><span className="block text-xs text-slate-400 mt-0.5">{stats?.currentTests} / {stats?.dueTests} Completed • <span className="text-[#FBD437]">+10 XP each</span></span></div>
+                          <div><span className={stats && stats.currentTests >= stats.dueTests ? "text-white" : "text-slate-400"}>Quests (Tests/Quiz)</span><span className="block text-xs text-slate-400 mt-0.5">{stats?.currentTests} / {stats?.dueTests} Completed • <span className="text-[#FBD437]">+10 XP each</span></span></div>
                         </li>
                         <li className="flex items-start gap-3 pt-2">
                           {stats && stats.currentMilestones >= stats.dueMilestones ? <CheckCircle2 className="w-5 h-5 text-[#05F283] shrink-0"/> : <MinusCircle className="w-5 h-5 text-[#FF5347] shrink-0"/>}
@@ -426,6 +428,46 @@ export default function AdventurersTavern() {
                       </ul>
                     </div>
                   </div>
+
+                  {/* THE NEW GRAND JOURNEY MAP */}
+                  <div className="bg-[#002B56] border border-[#028ECA]/40 rounded-2xl p-8 relative overflow-hidden shadow-lg mt-6">
+                    <h3 className="text-xl font-serif text-[#27DEF2] mb-10 flex items-center gap-2">
+                      <Map className="w-5 h-5 text-[#05F283]" /> Your Career Journey
+                    </h3>
+                    
+                    <div className="relative h-12 flex items-center mx-4 md:mx-8">
+                      {/* Background Track */}
+                      <div className="absolute left-0 right-0 h-2 bg-[#00152b] rounded-full border border-[#028ECA]/30"></div>
+                      
+                      {/* Fill Track */}
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.xpPercentage}%` }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }} className="absolute left-0 h-2 bg-gradient-to-r from-[#028ECA] via-[#27DEF2] to-[#05F283] rounded-full shadow-[0_0_10px_rgba(5,242,131,0.5)]"></motion.div>
+                      
+                      {/* Start Point */}
+                      <div className="absolute left-0 flex flex-col items-center -ml-4 z-10">
+                        <div className="bg-[#002B56] p-2 rounded-full border-2 border-[#028ECA] shadow-md">
+                          <Flag className="w-4 h-4 text-[#27DEF2]" />
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-2 uppercase tracking-wider font-bold">Start</span>
+                      </div>
+
+                      {/* Current Position (The Avatar Tracker) */}
+                      <motion.div initial={{ left: 0 }} animate={{ left: `${stats?.xpPercentage}%` }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }} className="absolute flex flex-col items-center -ml-4 z-20">
+                        <div className="bg-[#05F283] p-1.5 rounded-full shadow-[0_0_20px_rgba(5,242,131,0.9)] border-2 border-[#00152b]">
+                           <div className="w-3 h-3 bg-[#002B56] rounded-full"></div>
+                        </div>
+                        <span className="text-[10px] text-[#05F283] mt-2 uppercase tracking-wider font-bold bg-[#00152b] px-2 py-0.5 rounded-full border border-[#05F283]/30 whitespace-nowrap">You Are Here</span>
+                      </motion.div>
+
+                      {/* End Destination (ALX HQ) */}
+                      <div className="absolute right-0 flex flex-col items-center -mr-4 z-10">
+                        <div className="bg-[#002B56] p-2 rounded-full border-2 border-[#FBD437] shadow-[0_0_25px_rgba(251,212,55,0.7)]">
+                          <Building className="w-5 h-5 text-[#FBD437]" />
+                        </div>
+                        <span className="text-[10px] text-[#FBD437] mt-2 uppercase tracking-wider font-bold whitespace-nowrap">The Destination</span>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
@@ -439,7 +481,21 @@ export default function AdventurersTavern() {
                   {stats && equipmentList.filter(item => item.level <= stats.maxLevel).map((item, idx) => {
                     const isUnlocked = stats.currentMilestones >= item.level;
                     return (
-                      <motion.div key={idx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} onClick={() => setSelectedGear({ ...item, isUnlocked })} className={`relative p-6 rounded-xl flex flex-col items-center text-center cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_0_25px_rgba(5,242,131,0.5)] ${isUnlocked ? 'bg-gradient-to-b from-[#002B56] to-[#001f3f] border border-[#05F283]/50 shadow-[0_15px_30px_-5px_rgba(5,242,131,0.3),inset_0_2px_10px_rgba(255,255,255,0.1)]' : 'bg-[#00152b] border border-[#028ECA]/30 opacity-70 shadow-[inset_0_10px_20px_rgba(0,0,0,0.5)]'}`}>
+                      <motion.div 
+                        key={idx} 
+                        initial={{ opacity: 0, y: 20 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        transition={{ delay: idx * 0.1 }} 
+                        onClick={() => {
+                          setSelectedGear({ ...item, isUnlocked });
+                          // NEW: Trigger the 1-second unlock sound effect!
+                          if (isUnlocked && sfxRef.current) {
+                            sfxRef.current.currentTime = 0;
+                            sfxRef.current.play().catch((e:any) => console.log("Audio ignored by browser:", e));
+                          }
+                        }} 
+                        className={`relative p-6 rounded-xl flex flex-col items-center text-center cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_0_25px_rgba(5,242,131,0.5)] ${isUnlocked ? 'bg-gradient-to-b from-[#002B56] to-[#001f3f] border border-[#05F283]/50 shadow-[0_15px_30px_-5px_rgba(5,242,131,0.3),inset_0_2px_10px_rgba(255,255,255,0.1)]' : 'bg-[#00152b] border border-[#028ECA]/30 opacity-70 shadow-[inset_0_10px_20px_rgba(0,0,0,0.5)]'}`}
+                      >
                         <div className={`mb-4 p-4 rounded-full transition-all duration-500 ${isUnlocked ? 'bg-[#05F283]/20 text-[#05F283] drop-shadow-[0_0_15px_rgba(5,242,131,0.8)]' : 'bg-[#002B56] text-slate-600'}`}>{item.icon}</div>
                         <h4 className={`font-serif text-base font-bold mb-2 ${isUnlocked ? 'text-white' : 'text-slate-500'}`}>{item.name}</h4>
                         {isUnlocked ? <p className="text-xs text-[#27DEF2]">{item.desc}</p> : <div className="flex flex-col items-center mt-2 bg-[#001f3f] px-3 py-1.5 rounded-md border border-[#FF5347]/50"><Lock className="w-3 h-3 text-[#FF5347] mb-1" /><p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Lvl {item.level} Required</p></div>}
