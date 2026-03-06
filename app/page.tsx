@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, animate } from 'framer-motion';
-import { Scroll, Sword, Shield, Trophy, Crown, Sparkles, Map, Medal, Lock, Package, Coffee, Monitor, Book, PenTool, Headphones, Globe, Archive, Award, CheckCircle2, MinusCircle, X, Music, VolumeX, ChevronLeft, Building, Flag } from 'lucide-react';
+import { Scroll, Sword, Shield, Trophy, Crown, Sparkles, Map, Medal, Lock, Package, Coffee, Monitor, Book, PenTool, Headphones, Globe, Archive, Award, CheckCircle2, MinusCircle, X, Music, VolumeX, ChevronLeft } from 'lucide-react';
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyJnWiKtEHN4YkNHl92J7a4d3WooYitfNM5ZK8b3a_UR0iRnaDFjIoJXgma6tFM_93W/exec";
 
@@ -36,10 +36,9 @@ export default function AdventurersTavern() {
   const [selectedGear, setSelectedGear] = useState<any>(null);
   const [guildFilter, setGuildFilter] = useState('All');
   
-  // Audio state - OFF by default now!
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<any>(null);
-  const sfxRef = useRef<any>(null); // New SFX Reference
+  const sfxRef = useRef<any>(null);
 
   useEffect(() => {
     fetch(API_URL).then(res => res.json()).then(data => {
@@ -229,7 +228,7 @@ export default function AdventurersTavern() {
       <img src="/alx_white.png" alt="ALX Background" className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] opacity-[0.03] pointer-events-none z-0 object-contain" />
       <div className="fixed inset-0 opacity-20 pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle at center, #028ECA 0%, transparent 60%)' }} />
       
-      {/* Audio Tags - No AutoPlay on theme.mp3 */}
+      {/* Audio Tags */}
       <audio ref={audioRef} src="/theme.mp3" loop />
       <audio ref={sfxRef} src="/unlock.mp3" />
 
@@ -313,7 +312,7 @@ export default function AdventurersTavern() {
                 <h3 className="text-3xl font-serif text-center mb-12 flex items-center justify-center gap-3 text-white tracking-wider">
                   <Trophy className="w-8 h-8 text-[#FBD437]" /> Explore the Guild Rankings
                 </h3>
-                {loading ? <div className="text-center text-[#27DEF2] animate-pulse font-serif text-2xl">Syncing with ALX Mainframe...</div> : (
+                {loading ? <div className="text-center text-[#27DEF2] animate-pulse font-serif text-2xl">Syncing with ALX Mainframe, please wait...</div> : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
                     <button onClick={() => { setGuildFilter('All'); setCurrentView('aice'); }} className="relative group p-8 rounded-2xl bg-gradient-to-b from-[#002B56] to-[#028ECA]/40 border border-[#27DEF2]/50 transition-all duration-300 hover:-translate-y-4 shadow-[0_10px_30px_rgba(39,222,242,0.2)] hover:shadow-[0_20px_50px_rgba(39,222,242,0.5)] flex flex-col items-center">
                       <div className="w-20 h-20 bg-[#27DEF2]/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(39,222,242,0.5)]"><Sword className="w-10 h-10 text-[#27DEF2]" /></div>
@@ -428,46 +427,6 @@ export default function AdventurersTavern() {
                       </ul>
                     </div>
                   </div>
-
-                  {/* THE NEW GRAND JOURNEY MAP */}
-                  <div className="bg-[#002B56] border border-[#028ECA]/40 rounded-2xl p-8 relative overflow-hidden shadow-lg mt-6">
-                    <h3 className="text-xl font-serif text-[#27DEF2] mb-10 flex items-center gap-2">
-                      <Map className="w-5 h-5 text-[#05F283]" /> Your Career Journey
-                    </h3>
-                    
-                    <div className="relative h-12 flex items-center mx-4 md:mx-8">
-                      {/* Background Track */}
-                      <div className="absolute left-0 right-0 h-2 bg-[#00152b] rounded-full border border-[#028ECA]/30"></div>
-                      
-                      {/* Fill Track */}
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.xpPercentage}%` }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }} className="absolute left-0 h-2 bg-gradient-to-r from-[#028ECA] via-[#27DEF2] to-[#05F283] rounded-full shadow-[0_0_10px_rgba(5,242,131,0.5)]"></motion.div>
-                      
-                      {/* Start Point */}
-                      <div className="absolute left-0 flex flex-col items-center -ml-4 z-10">
-                        <div className="bg-[#002B56] p-2 rounded-full border-2 border-[#028ECA] shadow-md">
-                          <Flag className="w-4 h-4 text-[#27DEF2]" />
-                        </div>
-                        <span className="text-[10px] text-slate-400 mt-2 uppercase tracking-wider font-bold">Start</span>
-                      </div>
-
-                      {/* Current Position (The Avatar Tracker) */}
-                      <motion.div initial={{ left: 0 }} animate={{ left: `${stats?.xpPercentage}%` }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }} className="absolute flex flex-col items-center -ml-4 z-20">
-                        <div className="bg-[#05F283] p-1.5 rounded-full shadow-[0_0_20px_rgba(5,242,131,0.9)] border-2 border-[#00152b]">
-                           <div className="w-3 h-3 bg-[#002B56] rounded-full"></div>
-                        </div>
-                        <span className="text-[10px] text-[#05F283] mt-2 uppercase tracking-wider font-bold bg-[#00152b] px-2 py-0.5 rounded-full border border-[#05F283]/30 whitespace-nowrap">You Are Here</span>
-                      </motion.div>
-
-                      {/* End Destination (ALX HQ) */}
-                      <div className="absolute right-0 flex flex-col items-center -mr-4 z-10">
-                        <div className="bg-[#002B56] p-2 rounded-full border-2 border-[#FBD437] shadow-[0_0_25px_rgba(251,212,55,0.7)]">
-                          <Building className="w-5 h-5 text-[#FBD437]" />
-                        </div>
-                        <span className="text-[10px] text-[#FBD437] mt-2 uppercase tracking-wider font-bold whitespace-nowrap">The Destination</span>
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
               </div>
 
@@ -488,7 +447,6 @@ export default function AdventurersTavern() {
                         transition={{ delay: idx * 0.1 }} 
                         onClick={() => {
                           setSelectedGear({ ...item, isUnlocked });
-                          // NEW: Trigger the 1-second unlock sound effect!
                           if (isUnlocked && sfxRef.current) {
                             sfxRef.current.currentTime = 0;
                             sfxRef.current.play().catch((e:any) => console.log("Audio ignored by browser:", e));
